@@ -1,0 +1,7 @@
+{
+    "id": "powershell-scripts",
+    "filter": "devops",
+    "image": "http://code.purestorage.com/images/microsoft-azure.png",
+    "featured": 3,
+    "priority": 2
+}
