@@ -38,6 +38,7 @@ Param (
 $FA = New-PfaArray -EndPoint $endpoint -ApiToken $apitoken -IgnoreCertificateError
 
 $iom = Get-PfaArrayIOMetrics -Array $FA
+Disconnect-PfaArray -Array $FA
 
 $prtgSens = @{}
 $prtgSens.prtg = @{}
