@@ -13,7 +13,9 @@ This repository contains sample scripts that are posted to https://purepowershel
 * [Get-GitHubRelDownloads.ps1](https://github.com/barkz/PurePowerShellGuy/blob/master/Get-GitHubRelDownloads.ps1) -- Blog post: [Get GitHub Download Release Metrics](http://www.purepowershellguy.com/?p=12271)
 * [Show-HierarchyVisualization.ps1](https://github.com/barkz/PurePowerShellGuy/blob/master/Show-HierarchyVisualization.ps1) -- Blog post: [Create a Hierarchy Tree of Hosts, Volumes & Snapshots](http://www.purepowershellguy.com/?p=12401)
 * [Disable-DefragScheduledTasks.ps1](https://github.com/barkz/PurePowerShellGuy/blob/master/Disable-DefragScheduledTask.ps1) -- Blog post: [Best Practice: Disable Disk Fragmentation Scheduled Task](http://www.purepowershellguy.com/?p=12471)
-* [PRTG_Pure-FA.ps1](https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/master/PRTG_Pure-FA.ps1) -- Simple PRTG custom sensor to monitor Pure Storage FlashArray
+* [PRTG_PureFA-Basic.ps1](https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/master/PRTG_PureFA-Basic.ps1) -- Simple PRTG custom sensor to monitor Pure Storage FlashArray KPIs
+* [PRTG_PureFA-HW.ps1](https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/master/PRTG_PureFA-HW.ps1) -- Simple PRTG custom sensor to monitor Pure Storage FlashArray hardware components
+* [PRTG_PureFA-Volume.ps1](https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/master/PRTG_PureFA-Volume.ps1) -- Simple PRTG custom sensor to monitor Pure Storage FlashArray volumes
 
 ### RELEASE COMPATIBILITY
 
