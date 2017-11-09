@@ -2,11 +2,11 @@
 
 .SYNOPSIS
 
-Simple PRTG custom sensor for Pure Storage FlashArrays monitoring.
+Simple PRTG custom sensor for Pure Storage FlashArrays basic KPIs monitoring.
 
 .DESCRIPTION
 
-This custom sensor script retrieves the basic statistic counters from a Pure Storage FlashArray and returns them as seven channels in PRTG JSON format.
+This custom sensor script retrieves the basic statistic counters from a Pure Storage FlashArray and returns them as channels in PRTG JSON format.
 The script uses the PureStorage PowerShell SDK that must be installed on the probing host.
 
 .PARAMETER EndPoint
@@ -38,12 +38,17 @@ Param (
 $FA = New-PfaArray -EndPoint $endpoint -ApiToken $apitoken -IgnoreCertificateError
 
 $iom = Get-PfaArrayIOMetrics -Array $FA
+$spc = Get-PfaArraySpaceMetrics -Array $FA
 Disconnect-PfaArray -Array $FA
 
+$free_space = $spc.capacity - $spc.total
 $prtgSens = @{}
 $prtgSens.prtg = @{}
 $prtgSens.prtg.result = @( 
 
+@{ "channel" = "free space"; "value" = [string]$free_space; "unit" = "BytesDisk"; "VolumeSize" = "TeraByte" },
+@{ "channel" = "total volume size"; "value" = [string]$spc.volumes; "unit" = "BytesDisk"; "VolumeSize" = "TeraByte" },
+@{ "channel" = "data reduction"; "value" = [string]([Math]::Floor($spc.data_reduction)); "unit" = "custom"; "customunit" = ":1" },
 @{ "channel" = "wr sec"; "value" = [string]$iom.writes_per_sec; "unit" = "custom"; "customunit" = "IOPS write" } ,
 @{ "channel" = "rd sec"; "value" = [string]$iom.reads_per_sec; "unit" = "custom"; "customunit" = "IOPS read" } , 
 @{ "channel" = "wr latency"; "value" = [string]$iom.usec_per_write_op; "unit" = "custom"; "customunit" = "usec" } ,
