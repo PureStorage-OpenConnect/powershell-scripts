@@ -16,7 +16,7 @@ foreach ($name in $names) {
 }
 
 $spacemetrix = $arrays | Get-PfaArraySpaceMetrics -Verbose
-$spacemetrix = $spacemetrix | select *,@{N="expvolumes";E={$_.volumes*$_.data_reduction}},@{N="provisioned";E={$_.total/(1-$_.thin_provisioning)*$_.data_reduction}}
+$spacemetrix = $spacemetrix | select *,@{N="expvolumes";E={$_.volumes*$_.data_reduction}},@{N="provisioned";E={($_.total-$_.system)/(1-$_.thin_provisioning)*$_.data_reduction}}
 
 $totalcapacity = ($spacemetrix | measure capacity -sum).Sum
 $totalvolumes = ($spacemetrix | measure volumes -sum).Sum
