@@ -23,7 +23,7 @@ The API authentication token for the target FlashArray.
 .EXAMPLE
 
 
-PRTG_PureFA-Volume.ps1 -EndPoint 172.16.0.12 -ApiToken cef628f0-831b-30b9-4494-4e8ea56c207c
+PRTG_PureFA-HW.ps1 -EndPoint 172.16.0.12 -ApiToken cef628f0-831b-30b9-4494-4e8ea56c207c
 
 #>
 
