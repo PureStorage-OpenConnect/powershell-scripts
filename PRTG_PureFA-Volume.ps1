@@ -47,13 +47,13 @@ $FA = New-PfaArray -EndPoint $endpoint -ApiToken $apitoken -IgnoreCertificateErr
 $v_spc = Get-PfaVolumeSpaceMetrics -Array $FA -VolumeName $volname
 Disconnect-PfaArray -Array $FA
 
-$free_space = $v_spc.size - $v_spc.total
 $prtgSens = @{}
 $prtgSens.prtg = @{}
 $prtgSens.prtg.result = @( 
 
-@{ "channel" = "free space"; "value" = [string]$free_space; "unit" = "BytesDisk"; "VolumeSize" = "GigaByte" },
-@{ "channel" = "total volume size"; "value" = [string]$v_spc.volumes; "unit" = "BytesDisk"; "VolumeSize" = "GigaByte" } )
+@{ "channel" = "provisioned size"; "value" = [string]$v_spc.size; "unit" = "BytesDisk"; "VolumeSize" = "GigaByte" },
+@{ "channel" = "total snapshots size"; "value" = [string]$v_spc.snapshots; "unit" = "BytesDisk"; "VolumeSize" = "GigaByte" },
+@{ "channel" = "total volume size"; "value" = [string]$v_spc.volumes; "unit" = "BytesDisk"; "VolumeSize" = "GigaByte" }
 
 $sensOut = ConvertTo-Json -InputObject $prtgSens -Depth 3
 
