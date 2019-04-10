@@ -18,6 +18,7 @@ This repository contains sample scripts that are posted to https://purepowershel
 * [PRTG_PureFA-HW.ps1](https://github.com/barkz/powershell-scripts/blob/master/PRTG_PureFA-HW.ps1) -- Simple PRTG custom sensor to monitor Pure Storage FlashArray hardware components
 * [PRTG_PureFA-Perf.ps1](https://github.com/barkz/powershell-scripts/blob/master/PRTG_PureFA-Perf.ps1) -- Simple PRTH custom example to monitor Pure Storage FlashArray performance. 
 * [PRTG_PureFA-Volume.ps1](https://github.com/barkz/powershell-scripts/blob/master/PRTG_PureFA-Volume.ps1) -- Simple PRTG custom sensor to monitor Pure Storage FlashArray volumes
+* [PureFA_SAPHANA_ACS.psm1](https://github.com/barkz/powershell-scripts/blob/master/PureFA_SAPHANA_ACS.psm1) -- Blog post: [Automating storage snapshot data protection with SAP HANA and FlashArray](https://blog.purestorage.com/?p=63812&preview=true)
 
 ### RELEASE COMPATIBILITY
 
