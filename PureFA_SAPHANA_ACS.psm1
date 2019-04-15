@@ -9,19 +9,19 @@ LASTEDIT: 2019/04/04
 
  .Synopsis
 Provides and easy to use single command for the creating of application consistent storage snapshots between SAP HANA and Pure Storage Flash Array
-Only Scale up supported
+Scale up and Scale out supported.
 
 .Description
-Only New-SAPHANAStorageSnapshot is viewable when running impor-module FlashArray_SAPHANA_SDK.psm1 , this is then executed to create application consistent snapshots
+Only New-SAPHANAStorageSnapshot and New-DistributedSystemSAPHANAStorageSnapshot are viewable when running impor-module FlashArray_SAPHANA_SDK.psm1 , these are
+then executed to create application consistent snapshots for the specific SAP HANA deployment type.
 As a part of the process the filesystem is frozen and unfrozen for the SAP HANA data volume and the snapshot is either confirmed or abandonded for use. 
-The catalog is managed by the SAP HANA backup catalog itself
+The catalog is managed by the SAP HANA backup catalog itself.
 
 .Parameter HostAddress
 The IPv4 or V6 address of the SAP HANA host 
 
 .Parameter InstanceNumber
 The instance number of the SAP HANA deployment
-
 
 .Parameter DatabaseName
 The database name of the SAP HANA deployment 
@@ -77,8 +77,8 @@ Create a snapshot with all of the password fields being shown as plaintext
 
 # Version History
 #
-# 0.1a Initial Appl;ication consistent snapshots for Pure Storage Flash Array
-#
+# 0.1a Initial Application consistent snapshots for Pure Storage Flash Array
+# 0.1b Additional functionality to support Scale out deployments
 
 
 ##Static Non public values
