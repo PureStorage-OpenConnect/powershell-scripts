@@ -49,14 +49,25 @@ The password for the user specified in PureFlashArrayUser
 
 
 .Example
-New-SAPHANAStorageSnapshot -HostAddress <IP address of host> -InstanceNumber <Instance Number (00)> -DatabaseName <Database Name (HN1)> -DatabaseUser <DBUser> 
+New-SingleHostSAPHANAStorageSnapshot -HostAddress <IP address of host> -InstanceNumber <Instance Number (00)> -DatabaseName <Database Name (HN1)> -DatabaseUser <DBUser> 
 -OperatingSystemUser <OS-User> -PureFlashArrayAddress <Pure FlashArray IP or hostname> -PureFlashArrayUser <pure FA User> 
 Create a snapshot without entering information for trhe password fields
 
 .Example
-New-SAPHANAStorageSnapshot -HostAddress <IP address of host> -InstanceNumber <Instance Number (00)> -DatabaseName <Database Name (HN1)> -DatabaseUser <DBUser> -DatabasePassword <DBPassword> 
+New-SingleHostSAPHANAStorageSnapshot -HostAddress <IP address of host> -InstanceNumber <Instance Number (00)> -DatabaseName <Database Name (HN1)> -DatabaseUser <DBUser> -DatabasePassword <DBPassword> 
 -OperatingSystemUser <OS-User> -OperatingSystemPassword <OSPassword> -PureFlashArrayAddress <Pure FlashArray IP or hostname> -PureFlashArrayUser <pure FA User> -PureFlashArrayPassword <Pure FA Password>
 Create a snapshot with all of the password fields being shown as plaintext 
+
+.Example
+New-DistributedSystemSAPHANAStorageSnapshot -HostAddress <IP address of host> -InstanceNumber <Instance Number (00)> -DatabaseName <Database Name (HN1)> -DatabaseUser <DBUser> 
+-OperatingSystemUser <OS-User> -PureFlashArrayAddress <Pure FlashArray IP or hostname> -PureFlashArrayUser <pure FA User> 
+Create a snapshot without entering information for trhe password fields
+
+.Example
+New-DistributedSystemSAPHANAStorageSnapshot -HostAddress <IP address of host> -InstanceNumber <Instance Number (00)> -DatabaseName <Database Name (HN1)> -DatabaseUser <DBUser> -DatabasePassword <DBPassword> 
+-OperatingSystemUser <OS-User> -OperatingSystemPassword <OSPassword> -PureFlashArrayAddress <Pure FlashArray IP or hostname> -PureFlashArrayUser <pure FA User> -PureFlashArrayPassword <Pure FA Password>
+Create a snapshot with all of the password fields being shown as plaintext 
+
 #>
 
 
@@ -101,6 +112,7 @@ function Check-ForHDBDriver()
 
 function Check-ForPOSH-SSH()
 {
+    Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
     $poshSSHCHeck = Get-Module -Name Posh-SSH
     if($poshSSHCHeck -eq $null)
     {
@@ -116,17 +128,18 @@ function Check-ForPOSH-SSH()
 
 function Check-ForPureStorageSDK()
 {
-    $pureSTorageSDKCheck = Get-Module -Name PureStoragePowerShellToolkit
+    Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+    $pureSTorageSDKCheck = Get-Module -Name PureStoragePowerShellSDK
     if($pureSTorageSDKCheck -eq $null)
     {
         Write-Host "Installing Pure Storage Powershell toolkit"
-        Install-Module -Name PureStoragePowerShellToolkit 
+        Install-Module PureStoragePowerShellSDK
     }
     else
     {
         Write-Host "Pure Storage Powershell toolkit already installed"
     }
-    Import-Module PureStoragePowerShellToolkit
+    Import-Module PureStoragePowerShellSDK
 }
 
 function Get-ODBCData() 
@@ -159,7 +172,7 @@ function Get-VolumeSerialNumber()
         $OSUser,
         $OSPassword
     )
-    $Cred = New-Object â€“TypeName System.Management.Automation.PSCredential â€“ArgumentList $OSUser, $OSPassword
+    $Cred = New-Object –TypeName System.Management.Automation.PSCredential –ArgumentList $OSUser, $OSPassword
 		
     $output = New-SSHSession -ComputerName $HostAddress -Credential $Cred -AcceptKey:$True -ConnectionTimeout 60000
     $session = Get-SSHSession -Index 0
@@ -167,7 +180,6 @@ function Get-VolumeSerialNumber()
     Start-Sleep -Seconds 1
     $output = $stream.Read()
     $stream.WriteLine("df -h | grep " + $DataVolumeMountPoint)
-    #Start-Sleep -Seconds 1
     $output = $stream.Readline()
     $dfToParse = $stream.ReadLine()
     $ParsedVolumeDevLocation = [regex]::Match($dfToParse, '(\S+)').Groups[1].Value
@@ -178,6 +190,50 @@ function Get-VolumeSerialNumber()
     $volSerialNumber = ($queryResponse.split('='))[1]
     $output = Remove-SSHSession $session
     return $volSerialNumber
+}
+
+function Get-HostAttachedVolume()
+{
+    Param(
+        $HostAddress,
+        $SapHANAStorageInfo,
+        $OSUser,
+        $OSPassword
+    )
+
+    $Cred = New-Object –TypeName System.Management.Automation.PSCredential –ArgumentList $OSUser, $OSPassword
+    $output = New-SSHSession -ComputerName $HostAddress -Credential $Cred -AcceptKey:$True -ConnectionTimeout 60000
+    $session = Get-SSHSession -Index 0
+    $stream = $session.Session.CreateShellStream("dumb", 0, 0, 0, 0, 1000)
+    Start-Sleep -Seconds 1
+    $output = $stream.Read()
+    $stream.WriteLine("date")
+    $output = $stream.ReadLine()
+    $output = $stream.ReadLine()
+    Start-Sleep -Milliseconds 500
+    $promptLength = $stream.Length
+    $found = $false
+    $returnObject
+    while(!$found)
+    {
+        foreach($si in $SapHANAStorageInfo)
+        {
+            $stream.WriteLine("df -h | grep " + $si.PATH)
+            Start-Sleep -Milliseconds 500
+            $output = $stream.Readline()
+            while($stream.Length -gt $promptLength)
+            {
+                $dfToParse = $stream.ReadLine()
+                $si | Add-Member -NotePropertyName HOST_IP -NotePropertyValue $HostAddress
+                $returnObject = $si
+                $found = $True
+            }
+        }
+        $found = $true
+    }
+
+    $output =  Remove-SSHSession $session
+    return $returnObject
 }
 
 function Create-PureStorageVolumeSnapshot()
@@ -191,7 +247,7 @@ function Create-PureStorageVolumeSnapshot()
     )
 
     $Array = New-PfaArray -EndPoint $FlashArrayAddress -username $User -Password $Password -IgnoreCertificateError
-    $Volumes = Get-PfaVolumes -Array $Array #| Where-Object $serialNumber.ToUpper -Contains serial
+    $Volumes = Get-PfaVolumes -Array $Array 
 
     foreach($vol in $Volumes)
     {
@@ -227,7 +283,7 @@ function FreezeFileSystem()
         $OSPassword,
         $FilesystemMount
     )
-    $Cred = New-Object â€“TypeName System.Management.Automation.PSCredential â€“ArgumentList $OSUser, $OSPassword 
+    $Cred = New-Object –TypeName System.Management.Automation.PSCredential –ArgumentList $OSUser, $OSPassword 
 		
     $output = New-SSHSession -ComputerName $HostAddress -Credential $Cred -AcceptKey:$True -ConnectionTimeout 60000
     $session = Get-SSHSession -Index 0
@@ -235,6 +291,7 @@ function FreezeFileSystem()
     Start-Sleep -Seconds 1
     $output = $stream.Read()
     $stream.WriteLine(" /sbin/fsfreeze -f " + $FilesystemMount)
+    Start-Sleep -Milliseconds 250
     $output = Remove-SSHSession $session
 }
 
@@ -246,7 +303,7 @@ function UnFreezeFileSystem()
         $OSPassword,
         $FilesystemMount
     )
-    $Cred = New-Object â€“TypeName System.Management.Automation.PSCredential â€“ArgumentList $OSUser, $OSPassword 
+    $Cred = New-Object –TypeName System.Management.Automation.PSCredential –ArgumentList $OSUser, $OSPassword 
 		
     $output = New-SSHSession -ComputerName $HostAddress -Credential $Cred -AcceptKey:$True -ConnectionTimeout 60000
     $session = Get-SSHSession -Index 0
@@ -254,6 +311,7 @@ function UnFreezeFileSystem()
     Start-Sleep -Seconds 1
     $output = $stream.Read()
     $stream.WriteLine(" /sbin/fsfreeze -u " + $FilesystemMount)
+    Start-Sleep -Milliseconds 250
     $output = Remove-SSHSession $session
 }
 
@@ -287,7 +345,8 @@ function AskInSecureQ ([String]$Question, [String]$Foreground="Yellow", [String]
     Return (Read-Host)
 }
 
-Function New-SAPHANAStorageSnapshot()
+#SingleHost
+Function New-SingleHostSAPHANAStorageSnapshot()
 {
     Param(
     [parameter(Mandatory=$True)]
@@ -399,9 +458,185 @@ Function New-SAPHANAStorageSnapshot()
     }
 }
 
+#MultipleHost
+Function New-DistributedSystemSAPHANAStorageSnapshot()
+{
+    Param(
+    [parameter(Mandatory=$True)]
+    [string[]]$HostAddresses
+    ,
+    [parameter(,Mandatory=$True)]
+    [string]$InstanceNumber
+    ,
+    [parameter(Mandatory=$True)]
+    [string]$DatabaseName
+    ,
+    [parameter(Mandatory=$True)]
+    [string]$DatabaseUser
+    ,
+    [Parameter(Mandatory = $False)]
+    $DatabasePassword
+    ,
+    [parameter(Mandatory=$True)]
+    [string]$OperatingSystemUser
+    ,
+    [Parameter(Mandatory = $False)]
+    $OperatingSystemPassword
+    ,
+    [parameter(Mandatory=$True)]
+    [string]$PureFlashArrayAddress
+    ,
+    [parameter(Mandatory=$True)]
+    [string]$PureFlashArrayUser
+    ,
+    [Parameter(Mandatory = $False)]
+    $PureFlashArrayPassword
+    )
+
+    if ($DatabasePassword) {
+    #$DatabasePassword = $DatabasePassword 
+    } else {
+        $DatabasePassword = AskInSecureQ "Type in Database password "
+    }
+
+    if ($OperatingSystemPassword) {
+    $OperatingSystemPassword =  ConvertTo-SecureString -String $OperatingSystemPassword -AsPlainText -Force
+    } else {
+        $OperatingSystemPassword = AskSecureQ "Type in Operating System password"
+        }
+ 
+
+    if ($PureFlashArrayPassword) {
+    $PureFlashArrayPassword = ConvertTo-SecureString -String $PureFlashArrayPassword -AsPlainText -Force
+    } else {
+        $PureFlashArrayPassword = AskSecureQ "Type in Pure FlashArray password"
+    }
+
+    $SnapshotTime = "{0:yyyy-MM-dd HH:mm:ss}" -f (get-date)
+    $GetSAPAHANASystemType = "SELECT VALUE FROM M_INIFILE_CONTENTS WHERE FILE_NAME = 'global.ini' AND SECTION = 'multidb' AND KEY = 'mode'"
+    $GetDataVolumeLocation = "SELECT VALUE FROM M_INIFILE_CONTENTS WHERE FILE_NAME = 'global.ini' AND SECTION = 'persistence' AND KEY = 'basepath_datavolumes'"
+    $GetHostsAndStorage = "SELECT HOST,STORAGE_ID, PATH, KEY, VALUE from SYS.M_ATTACHED_STORAGES WHERE KEY = 'WWID'"
+    $CreateHDBStorageSnapshot = "BACKUP DATA FOR FULL SYSTEM CREATE SNAPSHOT COMMENT 'SNAPSHOT-" + $SnapshotTime +"';"
+    $RetrieveHDBSnapshotID = "SELECT BACKUP_ID, COMMENT FROM M_BACKUP_CATALOG WHERE ENTRY_TYPE_NAME = 'data snapshot' AND STATE_NAME = 'prepared' AND COMMENT = 'SNAPSHOT-" + $SnapshotTime +"';"
+    $RetrieveSystemDBLocation = "SELECT HOST FROM SYS.M_SERVICES WHERE DETAIL = 'master' AND SQL_PORT != 0"
+    $hdbConnectionString = "Driver={HDBODBC};ServerNode="
+    foreach($shhost in $HostAddresses)
+    {
+        $hdbConnectionString = $hdbConnectionString + $shhost + ":3" + $InstanceNumber + "15,"
+    }
+    $hdbConnectionString = $hdbConnectionString -replace ".{1}$"
+    $hdbConnectionString = $hdbConnectionString + ";UID=" + $DatabaseUser + ";PWD=" + $DatabasePassword +";"
+    $multiDB = $false
+
+    ##Check for necessary HDB Client Installation
+    if(Check-ForHDBDriver)
+    {
+        ##Check for required libraries for SSH and Pure Storage SDK
+        Check-ForPOSH-SSH
+        Check-ForPureStorageSDK
+        ##Check the SAP HANA system type for multiDB or single tenant DB
+        $SystemType = Check-SAPHANASystemType
+        if($SystemType.VALUE -eq 'multidb')
+        {
+            $systemDBLocation = Get-ODBCData -hanaConnectionString $hdbConnectionString -hdbsql $RetrieveSystemDBLocation
+            
+
+            $hdbConnectionString = "Driver={HDBODBC};ServerNode=" + $systemDBLocation.HOST + ":3" + $InstanceNumber + "13;UID=" + $DatabaseUser + ";PWD=" + $DatabasePassword +";"
+            $multiDB = $true
+        }
+
+
+        ##Get the volumes and mount path
+        $ShortMountPath = ((Get-ODBCData -hanaConnectionString $hdbConnectionString -hdbsql $GetDataVolumeLocation).VALUE)
+        if($multiDB)
+        {
+            $ShortMountPath = $ShortMountPath[1]
+        }
+        $HostsAndAttachedStorage = Get-ODBCData -hanaConnectionString $hdbConnectionString -hdbsql $GetHostsAndStorage
+        $IsolatedHostsAndStorage = @()
+        foreach($queryResult in $HostsAndAttachedStorage)
+        {
+            if($queryResult.PATH.Contains($ShortMountPath))
+            {
+                $IsolatedHostsAndStorage += $queryResult
+            }
+        }
+
+        $HostStorageInfo = @()
+        foreach($shhost in $HostAddresses)
+        {
+          $HostStorageInfo += Get-HostAttachedVolume -HostAddress $shhost -SapHANAStorageInfo $IsolatedHostsAndStorage -OSUser $OperatingSystemUser -OSPassword $OperatingSystemPassword
+        }
+
+        $IsolatedHostsAndStorage = @()
+        foreach($shhost in $HostStorageInfo)
+        {
+            if(!($shhost -eq $null))
+            {
+                $IsolatedHostsAndStorage += $shhost
+            }
+        }
+
+
+        ##Prepare HANA Storage Snapshot
+        Write-Host "Preparing SAP HANA Snapshot"
+        $HANASnapshot = Create-SAPHANADatabaseSnapshot 
+        Start-Sleep -Seconds 5
+
+        ##Freeze the filesystems
+        Write-Host "Freezing filesystems"
+        foreach($shhost in $IsolatedHostsAndStorage)
+        {
+            FreezeFileSystem -HostAddress $shhost.HOST_IP -OSUser $OperatingSystemUser -OSPassword $OperatingSystemPassword -FilesystemMount $shhost.PATH
+        }
+
+        ##Create Pure Volume Snapshots
+        Write-Host "Creating block volume snapshot"
+        $snapshotSerial = @()
+        foreach($shhost in $IsolatedHostsAndStorage)
+        {
+            
+            $SnapshotSuffix = "SAPHANA-" + $HANASnapshot.BACKUP_ID.ToString() + "-Host-" + $shhost.HOST + "-Path-" + $shhost.PATH.Replace($ShortMountPath + "/", "")
+            $snapshotSerial += Create-PureStorageVolumeSnapshot -FlashArrayAddress $PureFlashArrayAddress -User $PureFlashArrayUser -Password $PureFlashArrayPassword -SerialNumber $shhost.VALUE -SnapshotSuffix $SnapshotSuffix
+        
+        }
+       
+        ##Unfreeze the filesystems
+        Write-Host "Unfreezing filesystems"
+        foreach($shhost in $IsolatedHostsAndStorage)
+        {
+            UnFreezeFileSystem -HostAddress $shhost.HOST_IP -OSUser $OperatingSystemUser -OSPassword $OperatingSystemPassword -FilesystemMount $shhost.PATH
+        }
+        $countserials = 0
+        foreach($serial in $snapshotSerial)
+        {
+            if($serial -eq $null)
+            {
+                $countserials -= 1
+            }
+            else
+            {
+                $countserials += 1
+            }  
+        }
+
+        if($countserials -eq $IsolatedHostsAndStorage.Count)
+        {
+            Write-Host "Confirming Snapshot"
+            Confirm-SAPHANADatabaseSnapshot -ExternalBackupID $HANASnapshot.BACKUP_ID.ToString()
+        }
+        else
+        {
+            Write-Host "Abandoning Snapshot"
+            Abandon-SAPHANADatabaseSnapshot -BackupID $HANASnapshot.BACKUP_ID.ToString()
+        }
+    }
+}
+
 
 ############################################
 #    Exports for visibility                #
 ############################################
 
-Export-ModuleMember -Function 'New-SAPHANAStorageSnapshot'
+Export-ModuleMember -Function 'New-SingleHostSAPHANAStorageSnapshot'
+Export-ModuleMember -Function 'New-DistributedSystemSAPHANAStorageSnapshot'
