@@ -89,6 +89,7 @@ $GetDataVolumeLocation
 $CreateHDBStorageSnapshot
 $RetrieveHDBSnapshotID 
 $hdbConnectionString 
+$GetHostsAndStorage
 
 
 if( $PSVersiontable.PSVersion.Major -lt 3) {
@@ -403,7 +404,7 @@ Function New-SingleHostSAPHANAStorageSnapshot()
 
     $SnapshotTime = "{0:yyyy-MM-dd HH:mm:ss}" -f (get-date)
     $GetSAPAHANASystemType = "SELECT VALUE FROM M_INIFILE_CONTENTS WHERE FILE_NAME = 'global.ini' AND SECTION = 'multidb' AND KEY = 'mode'"
-    $GetDataVolumeLocation = "SELECT VALUE FROM M_INIFILE_CONTENTS WHERE FILE_NAME = 'global.ini' AND SECTION = 'persistence' AND KEY = 'basepath_datavolumes'"
+    $GetDataVolumeLocation = "SELECT VALUE FROM M_INIFILE_CONTENTS WHERE FILE_NAME = 'global.ini' AND SECTION = 'persistence' AND KEY = 'basepath_datavolumes'  AND VALUE NOT LIKE '$%'"
     $CreateHDBStorageSnapshot = "BACKUP DATA FOR FULL SYSTEM CREATE SNAPSHOT COMMENT 'SNAPSHOT-" + $SnapshotTime +"';"
     $RetrieveHDBSnapshotID = "SELECT BACKUP_ID, COMMENT FROM M_BACKUP_CATALOG WHERE ENTRY_TYPE_NAME = 'data snapshot' AND STATE_NAME = 'prepared' AND COMMENT = 'SNAPSHOT-" + $SnapshotTime +"';"
     $hdbConnectionString = "Driver={HDBODBC};ServerNode=" + $HostAddress + ":3" + $InstanceNumber + "15;UID=" + $DatabaseUser + ";PWD=" + $DatabasePassword +";"
@@ -424,10 +425,6 @@ Function New-SingleHostSAPHANAStorageSnapshot()
         }
         ##Get the volume serial number 
         $ShortMountPath = ((Get-ODBCData -hanaConnectionString $hdbConnectionString -hdbsql $GetDataVolumeLocation).VALUE).Replace("/" + $DatabaseName,"")
-        if($multiDB)
-        {
-            $ShortMountPath = $ShortMountPath[1]
-        }
         $SerialNumber =  Get-VolumeSerialNumber -HostAddress $HostAddress -OSUser $OperatingSystemUser -OSPassword $OperatingSystemPassword -DataVolumeMountPoint $ShortMountPath
 
         ##Prepare HANA Storage Snapshot
@@ -514,11 +511,10 @@ Function New-DistributedSystemSAPHANAStorageSnapshot()
 
     $SnapshotTime = "{0:yyyy-MM-dd HH:mm:ss}" -f (get-date)
     $GetSAPAHANASystemType = "SELECT VALUE FROM M_INIFILE_CONTENTS WHERE FILE_NAME = 'global.ini' AND SECTION = 'multidb' AND KEY = 'mode'"
-    $GetDataVolumeLocation = "SELECT VALUE FROM M_INIFILE_CONTENTS WHERE FILE_NAME = 'global.ini' AND SECTION = 'persistence' AND KEY = 'basepath_datavolumes'"
-    $GetHostsAndStorage = "SELECT HOST,STORAGE_ID, PATH, KEY, VALUE from SYS.M_ATTACHED_STORAGES WHERE KEY = 'WWID'"
+    $GetHostsAndStorage = "SELECT HOST, STORAGE_ID, PATH, KEY, VALUE FROM SYS.M_ATTACHED_STORAGES WHERE KEY = 'WWID' AND PATH LIKE (SELECT CONCAT(VALUE,'%') FROM M_INIFILE_CONTENTS WHERE FILE_NAME = 'global.ini' AND SECTION = 'persistence' AND KEY = 'basepath_datavolumes' AND VALUE NOT LIKE '$%')"
     $CreateHDBStorageSnapshot = "BACKUP DATA FOR FULL SYSTEM CREATE SNAPSHOT COMMENT 'SNAPSHOT-" + $SnapshotTime +"';"
     $RetrieveHDBSnapshotID = "SELECT BACKUP_ID, COMMENT FROM M_BACKUP_CATALOG WHERE ENTRY_TYPE_NAME = 'data snapshot' AND STATE_NAME = 'prepared' AND COMMENT = 'SNAPSHOT-" + $SnapshotTime +"';"
-    $RetrieveSystemDBLocation = "SELECT HOST FROM SYS.M_SERVICES WHERE DETAIL = 'master' AND SQL_PORT != 0"
+    $RetrieveSystemDBLocation = "SELECT HOST FROM SYS.M_SERVICES WHERE DETAIL = 'master' AND SERVICE_NAME = 'nameserver'"
     $hdbConnectionString = "Driver={HDBODBC};ServerNode="
     foreach($shhost in $HostAddresses)
     {
@@ -539,33 +535,19 @@ Function New-DistributedSystemSAPHANAStorageSnapshot()
         if($SystemType.VALUE -eq 'multidb')
         {
             $systemDBLocation = Get-ODBCData -hanaConnectionString $hdbConnectionString -hdbsql $RetrieveSystemDBLocation
-            
-
             $hdbConnectionString = "Driver={HDBODBC};ServerNode=" + $systemDBLocation.HOST + ":3" + $InstanceNumber + "13;UID=" + $DatabaseUser + ";PWD=" + $DatabasePassword +";"
             $multiDB = $true
         }
 
 
         ##Get the volumes and mount path
-        $ShortMountPath = ((Get-ODBCData -hanaConnectionString $hdbConnectionString -hdbsql $GetDataVolumeLocation).VALUE)
-        if($multiDB)
-        {
-            $ShortMountPath = $ShortMountPath[1]
-        }
         $HostsAndAttachedStorage = Get-ODBCData -hanaConnectionString $hdbConnectionString -hdbsql $GetHostsAndStorage
-        $IsolatedHostsAndStorage = @()
-        foreach($queryResult in $HostsAndAttachedStorage)
-        {
-            if($queryResult.PATH.Contains($ShortMountPath))
-            {
-                $IsolatedHostsAndStorage += $queryResult
-            }
-        }
+        
 
         $HostStorageInfo = @()
         foreach($shhost in $HostAddresses)
         {
-          $HostStorageInfo += Get-HostAttachedVolume -HostAddress $shhost -SapHANAStorageInfo $IsolatedHostsAndStorage -OSUser $OperatingSystemUser -OSPassword $OperatingSystemPassword
+          $HostStorageInfo += Get-HostAttachedVolume -HostAddress $shhost -SapHANAStorageInfo $HostsAndAttachedStorage -OSUser $OperatingSystemUser -OSPassword $OperatingSystemPassword
         }
 
         $IsolatedHostsAndStorage = @()
