@@ -438,14 +438,14 @@ Function New-SingleHostSAPHANAStorageSnapshot()
 
         ##Create Pure Volume Snapshot
         $SnapshotSuffix = "SAPHANA-" + $HANASnapshot.BACKUP_ID.ToString()
-        $snapshotSerial = Create-PureStorageVolumeSnapshot -FlashArrayAddress $PureFlashArrayAddress -User $PureFlashArrayUser -Password $PureFlashArrayPassword -SerialNumber $serialNumber -SnapshotSuffix $SnapshotSuffix
+        $EBID = Create-PureStorageVolumeSnapshot -FlashArrayAddress $PureFlashArrayAddress -User $PureFlashArrayUser -Password $PureFlashArrayPassword -SerialNumber $serialNumber -SnapshotSuffix $SnapshotSuffix
         ##Unfreeze the filesystem
         Write-Host "Unfreezing filesystem"
         UnFreezeFileSystem -HostAddress $HostAddress -OSUser $OperatingSystemUser -OSPassword $OperatingSystemPassword -FilesystemMount $ShortMountPath
         if(!($snapshotSerial -eq $null))
         {
             Write-Host "Confirming Snapshot"
-            Confirm-SAPHANADatabaseSnapshot -ExternalBackupID $HANASnapshot.BACKUP_ID.ToString()
+            Confirm-SAPHANADatabaseSnapshot -ExternalBackupID $EBID
         }
         else
         {
@@ -590,6 +590,7 @@ Function New-DistributedSystemSAPHANAStorageSnapshot()
             UnFreezeFileSystem -HostAddress $shhost.HOST_IP -OSUser $OperatingSystemUser -OSPassword $OperatingSystemPassword -FilesystemMount $shhost.PATH
         }
         $countserials = 0
+        $EBID = ""
         foreach($serial in $snapshotSerial)
         {
             if($serial -eq $null)
@@ -598,14 +599,17 @@ Function New-DistributedSystemSAPHANAStorageSnapshot()
             }
             else
             {
+                $EBID = $EBID + $serial + ","
                 $countserials += 1
             }  
         }
 
+
         if($countserials -eq $IsolatedHostsAndStorage.Count)
         {
             Write-Host "Confirming Snapshot"
-            Confirm-SAPHANADatabaseSnapshot -ExternalBackupID $HANASnapshot.BACKUP_ID.ToString()
+            $EBID = $EBID -replace ".{1}$"
+            Confirm-SAPHANADatabaseSnapshot -ExternalBackupID $EBID
         }
         else
         {
