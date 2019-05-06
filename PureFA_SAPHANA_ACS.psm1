@@ -319,20 +319,20 @@ function UnFreezeFileSystem()
 function Abandon-SAPHANADatabaseSnapshot()
 {
     Param(
-        $BackupID
+        $BackupID, 
+        $EBID
     )
-    $FailureTime = "{0:yyyy-MM-dd HH:mm:ss}" -f (get-date)
-    $AbandonHDBSnapshot = "BACKUP DATA FOR FULL SYSTEM CLOSE SNAPSHOT BACKUP_ID " + $BackupID + " UNSUCCESSFUL '" + $FailureTime + "';"
+    $AbandonHDBSnapshot = "BACKUP DATA FOR FULL SYSTEM CLOSE SNAPSHOT BACKUP_ID " + $BackupID + " UNSUCCESSFUL '" + $EBID + "';"
     Get-ODBCData -hanaConnectionString $hdbConnectionString -hdbsql $AbandonHDBSnapshot
 }
 
 function Confirm-SAPHANADatabaseSnapshot()
 {
     Param(
-        $ExternalBackupID
+        $BackupID,
+        $EBID
     )
-    $SuccessTime = "{0:yyyy-MM-dd HH:mm:ss}" -f (get-date)
-    $ConfirmHDBSnapshot = "BACKUP DATA FOR FULL SYSTEM CLOSE SNAPSHOT BACKUP_ID " + $ExternalBackupID + " SUCCESSFUL '" + $SuccessTime + "';"
+    $ConfirmHDBSnapshot = "BACKUP DATA FOR FULL SYSTEM CLOSE SNAPSHOT BACKUP_ID " + $BackupID + " SUCCESSFUL '" + $EBID + "';"
     Get-ODBCData -hanaConnectionString $hdbConnectionString -hdbsql $ConfirmHDBSnapshot
 }
 
@@ -442,15 +442,15 @@ Function New-SingleHostSAPHANAStorageSnapshot()
         ##Unfreeze the filesystem
         Write-Host "Unfreezing filesystem"
         UnFreezeFileSystem -HostAddress $HostAddress -OSUser $OperatingSystemUser -OSPassword $OperatingSystemPassword -FilesystemMount $ShortMountPath
-        if(!($snapshotSerial -eq $null))
+        if(!($EBID -eq $null))
         {
             Write-Host "Confirming Snapshot"
-            Confirm-SAPHANADatabaseSnapshot -ExternalBackupID $EBID
+            Confirm-SAPHANADatabaseSnapshot -BackupID $HANASnapshot.BACKUP_ID.ToString() -EBID $EBID
         }
         else
         {
             Write-Host "Abandoning Snapshot"
-            Abandon-SAPHANADatabaseSnapshot -BackupID $HANASnapshot.BACKUP_ID.ToString()
+            Abandon-SAPHANADatabaseSnapshot -BackupID $HANASnapshot.BACKUP_ID.ToString() -EBID $EBID
         }
     }
 }
@@ -609,12 +609,12 @@ Function New-DistributedSystemSAPHANAStorageSnapshot()
         {
             Write-Host "Confirming Snapshot"
             $EBID = $EBID -replace ".{1}$"
-            Confirm-SAPHANADatabaseSnapshot -ExternalBackupID $EBID
+            Confirm-SAPHANADatabaseSnapshot -BackupID $HANASnapshot.BACKUP_ID.ToString() -EBID "ScaleOut"
         }
         else
         {
             Write-Host "Abandoning Snapshot"
-            Abandon-SAPHANADatabaseSnapshot -BackupID $HANASnapshot.BACKUP_ID.ToString()
+            Abandon-SAPHANADatabaseSnapshot -BackupID $HANASnapshot.BACKUP_ID.ToString() -EBID "ScaleOut"
         }
     }
 }
