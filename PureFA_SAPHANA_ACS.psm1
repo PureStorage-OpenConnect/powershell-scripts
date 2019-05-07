@@ -47,6 +47,9 @@ A user for the Pure storage FlashArray with permissions to create snapshots and 
 .Parameter PureFlashArrayPassword
 The password for the user specified in PureFlashArrayUser
 
+.Parameter DomainName
+Only for Scale out scenarios where the search domain does not match the existing domain for the SAP HANA hosts
+
 
 .Example
 New-SingleHostSAPHANAStorageSnapshot -HostAddress <IP address of host> -InstanceNumber <Instance Number (00)> -DatabaseName <Database Name (HN1)> -DatabaseUser <DBUser> 
@@ -65,6 +68,11 @@ Create a snapshot without entering information for trhe password fields
 
 .Example
 New-DistributedSystemSAPHANAStorageSnapshot -HostAddress <IP address of host> -InstanceNumber <Instance Number (00)> -DatabaseName <Database Name (HN1)> -DatabaseUser <DBUser> -DatabasePassword <DBPassword> 
+-OperatingSystemUser <OS-User> -OperatingSystemPassword <OSPassword> -PureFlashArrayAddress <Pure FlashArray IP or hostname> -PureFlashArrayUser <pure FA User> -PureFlashArrayPassword <Pure FA Password>
+Create a snapshot with all of the password fields being shown as plaintext 
+
+.Example
+New-DistributedSystemSAPHANAStorageSnapshot -HostAddress <IP address of host> -DomainName domain.local -InstanceNumber <Instance Number (00)> -DatabaseName <Database Name (HN1)> -DatabaseUser <DBUser> -DatabasePassword <DBPassword> 
 -OperatingSystemUser <OS-User> -OperatingSystemPassword <OSPassword> -PureFlashArrayAddress <Pure FlashArray IP or hostname> -PureFlashArrayUser <pure FA User> -PureFlashArrayPassword <Pure FA Password>
 Create a snapshot with all of the password fields being shown as plaintext 
 
@@ -462,6 +470,9 @@ Function New-DistributedSystemSAPHANAStorageSnapshot()
     [parameter(Mandatory=$True)]
     [string[]]$HostAddresses
     ,
+    [Parameter(Mandatory = $False)]
+    $DomainName
+    ,
     [parameter(,Mandatory=$True)]
     [string]$InstanceNumber
     ,
@@ -535,7 +546,14 @@ Function New-DistributedSystemSAPHANAStorageSnapshot()
         if($SystemType.VALUE -eq 'multidb')
         {
             $systemDBLocation = Get-ODBCData -hanaConnectionString $hdbConnectionString -hdbsql $RetrieveSystemDBLocation
-            $hdbConnectionString = "Driver={HDBODBC};ServerNode=" + $systemDBLocation.HOST + ":3" + $InstanceNumber + "13;UID=" + $DatabaseUser + ";PWD=" + $DatabasePassword +";"
+            if(!($DomainName -eq $null))
+            {
+                $hdbConnectionString = "Driver={HDBODBC};ServerNode=" + $systemDBLocation.HOST + "." + $DomainName + ":3" + $InstanceNumber + "13;UID=" + $DatabaseUser + ";PWD=" + $DatabasePassword +";"
+            }
+            else
+            {
+                $hdbConnectionString = "Driver={HDBODBC};ServerNode=" + $systemDBLocation.HOST + ":3" + $InstanceNumber + "13;UID=" + $DatabaseUser + ";PWD=" + $DatabasePassword +";"
+            }
             $multiDB = $true
         }
 
