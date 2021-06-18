@@ -1,6 +1,6 @@
 ## Pure Storage PowerShell Example Scripts
 ### EXAMPLE SCRIPTS
-* Set-IscsiTcpSettings.ps1 -- Script to disable Nagle (TcpNoDelay) and TcpAckFrequency on a per adapter basis.
+* [Set-IscsiTcpSettings.ps1]{https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/main/Set-IscsiTcpSettings.ps1) -- Script to disable Nagle (TcpNoDelay) and TcpAckFrequency on a per adapter basis.
 * [Get-PfaRASession.ps1](https://github.com/barkz/PurePowerShellGuy/blob/master/Get-PfaRASession.ps1) -- Blog post: [Checking for Active Remote Assist Session](http://www.purepowershellguy.com/?p=12631)
 * [Get-PfaConnections.ps1](https://github.com/barkz/PurePowerShellGuy/blob/master/Get-PfaConnections.ps1) -- Blog post: [What Volume is Connected to What Host?](http://www.purepowershellguy.com/?p=10312)
 * [Get-PfaCapacitySummary.ps1](https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/master/Get-PfaCapacitySummary.ps1) -- A basic script that surveys PFA fleet and outputs aggregated capacity summary.
