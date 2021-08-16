@@ -1,6 +1,7 @@
 ## Pure Storage PowerShell Example Scripts
 ### EXAMPLE SCRIPTS
-* [Set-IscsiTcpSettings.ps1]{https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/main/Set-IscsiTcpSettings.ps1) -- Script to disable Nagle (TcpNoDelay) and TcpAckFrequency on a per adapter basis.
+* [Get-WindowsDiagnosticinfo.ps1](https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/master/Get-WindowsDiagnosticInfo.ps1) -- Script to collect diagnostic and log information from the Windows OS.
+* [Set-IscsiTcpSettings.ps1](https://github.com/PureStorage-OpenConnect/powershell-toolkit) -- Script to disable Nagle (TcpNoDelay) and TcpAckFrequency on a per adapter basis. **This script is now included in the PowerShell Toolkit module**
 * [Get-PfaRASession.ps1](https://github.com/barkz/PurePowerShellGuy/blob/master/Get-PfaRASession.ps1) -- Blog post: [Checking for Active Remote Assist Session](http://www.purepowershellguy.com/?p=12631)
 * [Get-PfaConnections.ps1](https://github.com/barkz/PurePowerShellGuy/blob/master/Get-PfaConnections.ps1) -- Blog post: [What Volume is Connected to What Host?](http://www.purepowershellguy.com/?p=10312)
 * [Get-PfaCapacitySummary.ps1](https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/master/Get-PfaCapacitySummary.ps1) -- A basic script that surveys PFA fleet and outputs aggregated capacity summary.
@@ -18,8 +19,8 @@
 
 ### RELEASE COMPATIBILITY
 
-* The scripts intended for FlashArrays are only compatable with the SDK version 1.x.
-* These scripts require PowerShell 3.0 or higher..
+* The scripts intended for FlashArrays are only currently compatable with the SDK version 1.x.
+* These scripts require PowerShell 3.0 or higher.
 * These scripts require an operating system that supports the TLS 1.1/1.2 protocols.
 
 
