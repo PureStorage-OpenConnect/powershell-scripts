@@ -1,6 +1,6 @@
 #Requires -RunAsAdministrator
 <#
-  Get-WindowsDiagnosticInfo.ps1
+  Get-WindowsDiagnosticInfo.ps1 - https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/main/Get-WindowsDiagnosticInfo.ps1
   Version:        1.0.0.0
   Author:         Mike Nelson @ Pure Storage
 .SYNOPSIS
