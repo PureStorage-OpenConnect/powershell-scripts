@@ -3,6 +3,9 @@
 ### Most of these scripts require the [Pure Storage Powerhell SDK](https://github.com/PureStorage-Connect).
 
 ## EXAMPLE SCRIPTS
+Updated 09-02-2021
+* [New-PfaRestSession.ps1](https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/main/New-PfaRestSession.ps1) -- REST wrapper script created by Cody Hosterman for operations that are in the FlashArray REST, but not in the Pure Storage PowerShell SDK yet, this function provides a connection for Invoke-RestMethod to use.
+* [Remove-PfaRestSession.ps1](https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/main/Remove-PfaRestSession.ps1) -- REST wrapper script written by Cody Hosterman that terminates a REST session created by New-PfaRestSession.ps1.
 * [Get-WindowsDiagnosticinfo.ps1](https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/main/Get-WindowsDiagnosticInfo.ps1) -- Script to collect diagnostic and log information from the Windows OS.
 * [Set-IscsiTcpSettings.ps1](https://github.com/PureStorage-OpenConnect/powershell-toolkit) -- Script to disable Nagle (TcpNoDelay) and TcpAckFrequency on a per adapter basis. (**This script is now included in the PowerShell Toolkit module**)
 * [Get-PfaRASession.ps1](https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/main/Get-PfaRASession.ps1) -- Blog post: [Checking for Active Remote Assist Session](http://www.purepowershellguy.com/?p=12631)
