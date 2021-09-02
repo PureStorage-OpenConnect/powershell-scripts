@@ -1,8 +1,8 @@
 # Pure Storage PowerShell Example Scripts
-### These scripts are provided as examples and are freely available for modifications and use. many of these scripts have been incorprated into the [Pure PowerShell Toolkit](https://github.com/PureStorage-OpenConnect/powershell-toolkit).
-### Most of these scripts require the [Pure Storage Powerhell SDK](https://github.com/PureStorage-Connect).
+#### These scripts are provided as examples and are freely available for modifications and use. many of these scripts have been incorprated into the [Pure PowerShell Toolkit](https://github.com/PureStorage-OpenConnect/powershell-toolkit).
+#### Most of these scripts require the [Pure Storage Powerhell SDK](https://github.com/PureStorage-Connect).
 
-## EXAMPLE SCRIPTS
+### EXAMPLE SCRIPTS
 Updated 09-02-2021
 * [New-PfaRestSession.ps1](https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/main/New-PfaRestSession.ps1) -- REST wrapper script created by Cody Hosterman for operations that are in the FlashArray REST, but not in the Pure Storage PowerShell SDK yet, this function provides a connection for Invoke-RestMethod to use.
 * [Remove-PfaRestSession.ps1](https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/main/Remove-PfaRestSession.ps1) -- REST wrapper script written by Cody Hosterman that terminates a REST session created by New-PfaRestSession.ps1.
