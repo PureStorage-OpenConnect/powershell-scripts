@@ -22,7 +22,7 @@ Updated 10-20-2021
 * [PRTG_PureFA-HW.ps1](https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/main/PRTG_PureFA-HW.ps1) -- Simple PRTG custom sensor to monitor Pure Storage FlashArray hardware components
 * [PRTG_PureFA-Perf.ps1](https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/main/PRTG_PureFA-Perf.ps1) -- Simple PRTG custom example to monitor Pure Storage FlashArray performance.
 * [PRTG_PureFA-Volume.ps1](https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/main/PRTG_PureFA-Volume.ps1) -- Simple PRTG custom sensor to monitor Pure Storage FlashArray volumes
-* [Update-UserPassword.ps1](https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/main/Update-UserPassword.ps1) -- Simple PRTG custom sensor to monitor Pure Storage FlashArray volumes
+* [Update-UserPassword.ps1](https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/main/Update-UserPassword.ps1) -- Simple script containing a function used to change user passwords via PowerShell
 
 ### RELEASE COMPATIBILITY
 
