@@ -3,7 +3,7 @@
 #### Most of these scripts require the [Pure Storage Powerhell SDK](https://github.com/PureStorage-Connect).
 
 ### EXAMPLE SCRIPTS
-Updated 09-02-2021
+Updated 10-20-2021
 * [New-PfaRestSession.ps1](https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/main/New-PfaRestSession.ps1) -- REST wrapper script created by Cody Hosterman for operations that are in the FlashArray REST, but not in the Pure Storage PowerShell SDK yet, this function provides a connection for Invoke-RestMethod to use.
 * [Remove-PfaRestSession.ps1](https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/main/Remove-PfaRestSession.ps1) -- REST wrapper script written by Cody Hosterman that terminates a REST session created by New-PfaRestSession.ps1.
 * [Get-WindowsDiagnosticinfo.ps1](https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/main/Get-WindowsDiagnosticInfo.ps1) -- Script to collect diagnostic and log information from the Windows OS.
@@ -22,6 +22,7 @@ Updated 09-02-2021
 * [PRTG_PureFA-HW.ps1](https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/main/PRTG_PureFA-HW.ps1) -- Simple PRTG custom sensor to monitor Pure Storage FlashArray hardware components
 * [PRTG_PureFA-Perf.ps1](https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/main/PRTG_PureFA-Perf.ps1) -- Simple PRTG custom example to monitor Pure Storage FlashArray performance.
 * [PRTG_PureFA-Volume.ps1](https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/main/PRTG_PureFA-Volume.ps1) -- Simple PRTG custom sensor to monitor Pure Storage FlashArray volumes
+* [Update-UserPassword.ps1](https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/main/Update-UserPassword.ps1) -- Simple PRTG custom sensor to monitor Pure Storage FlashArray volumes
 
 ### RELEASE COMPATIBILITY
 
