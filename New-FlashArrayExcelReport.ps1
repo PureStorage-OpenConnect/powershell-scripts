@@ -4,7 +4,7 @@ version 1.0.0
 Original script credit to Seteesh1 in the Pure Storage Community Forums
 
 .SYNOPSIS
-    Create a Excel workbook that contains FlashArray Information
+    Create an Excel workbook that contains FlashArray Information for each array specified in a file.
     .DESCRIPTION
     This cmdlet will retrieve array, volume, host, pod, and snapshot capacity information from all of the FlashArrays listed in the txt file and output it to an Excel spreadsheet. Each arrays will have it's own filename and the current date and time will be added to the filenames.
     .PARAMETER Username
