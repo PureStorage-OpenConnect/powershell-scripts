@@ -2,6 +2,11 @@
 New-FlashArrayExcelReport.ps1
 version 1.0.0
 Original script credit to Seteesh1 in the Pure Storage Community Forums
+TO-DO:
+- Add capability for multipel array credentials
+- Add more Pod metrics
+- add more general arrray information - ntp, snmp, syslog, roles, settings, etc
+- add networking
 
 .SYNOPSIS
     Create an Excel workbook that contains FlashArray Information for each array specified in a file.
