@@ -43,7 +43,7 @@ Param(
 )
 # create root outfile
 $folder = Test-Path -PathType Container -Path "c:\$env:computername"
-if ($folder -eq "False") {
+if ($folder -eq $false) {
 New-Item -Path "c:\$env:computername" -ItemType "directory" | Out-Null
 }
 Set-Location -Path "c:\$env:computername"

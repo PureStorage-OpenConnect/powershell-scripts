@@ -6,7 +6,7 @@
 
 ### EXAMPLE SCRIPTS
 
-Updated 09-02-2021
+Updated 04-01-2022
 
 - [New-FlashArrayExcelReport.ps1](https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/main/New-FlashArrayExcelReport.ps1) -- Create an Excel workbook that contains FlashArray Information for each array specified in a file.
 - [New-PfaRestSession.ps1](https://github.com/PureStorage-OpenConnect/powershell-scripts/blob/main/New-PfaRestSession.ps1) -- REST wrapper script created by Cody Hosterman for operations that are in the FlashArray REST, but not in the Pure Storage PowerShell SDK yet, this function provides a connection for Invoke-RestMethod to use.
